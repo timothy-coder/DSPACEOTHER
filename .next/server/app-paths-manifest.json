@@ -1,0 +1,8 @@
+{
+  "/api/ocde/route": "app/api/ocde/route.js",
+  "/api/ocde/[id]/route": "app/api/ocde/[id]/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/ocde/page": "app/dashboard/ocde/page.js",
+  "/dashboard/decanos/page": "app/dashboard/decanos/page.js",
+  "/dashboard/ocde/[id]/page": "app/dashboard/ocde/[id]/page.js"
+}
