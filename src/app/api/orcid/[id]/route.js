@@ -1,15 +1,15 @@
 import pool from '@/app/lib/db';
 
-// Actualizar OCDE por ID
+// Actualizar ORCID por ID
 export async function PUT(request, { params }) {
   try {
     const { id } = params;
-    const { facultad, ocde, codigoprograma } = await request.json();
+    const { dni, nombreapellido, orcid } = await request.json();
 
     const connection = await pool.getConnection();
     const [result] = await connection.query(
-      'UPDATE ocde SET facultad = ?, ocde = ?, codigoprograma = ? WHERE id = ?',
-      [facultad, ocde, codigoprograma, id]
+      'UPDATE ocde SET dni = ?, nombreapellido = ?, orcid = ? WHERE id = ?',
+      [dni, nombreapellido, orcid, id]
     );
     connection.release();
 
@@ -26,13 +26,13 @@ export async function PUT(request, { params }) {
   }
 }
  
-// Eliminar OCDE por ID
+// Eliminar ORCID por ID
 export async function DELETE(request, { params }) {
   try {
     const { id } = params;
 
     const connection = await pool.getConnection();
-    const [result] = await connection.query('DELETE FROM ocde WHERE id = ?', [id]);
+    const [result] = await connection.query('DELETE FROM orcid WHERE id = ?', [id]);
     connection.release();
 
     if (result.affectedRows === 0) {

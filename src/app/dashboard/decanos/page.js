@@ -1,6 +1,6 @@
 // src/app/dashboard/decanos/page.js
 import DashboardLayout from '../../../components/DashboardLayout';
-import DecanosList from '../../../components/DecanosList';
+import DecanosList from '../../../components/DECANOSList';
 
 export default function DecanosPage() {
   return (

@@ -20,7 +20,7 @@ const OCDEList = () => {
   const handleDelete = async (id) => {
     const confirmDelete = confirm('¿Estás seguro de eliminar este registro?');
     if (confirmDelete) {
-      await fetch('/api/ocde', {
+      await fetch(`/api/ocde/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),

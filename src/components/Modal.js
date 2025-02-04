@@ -1,6 +1,3 @@
-// src/app/components/Modal.js
-'use client';
-
 import { useState, useEffect } from 'react';
 import styles from './Modal.module.css';
 
@@ -36,14 +33,33 @@ const Modal = ({ title, fields, onClose, onSubmit, initialData }) => {
           {fields.map((field, index) => (
             <div key={index} className={styles.formGroup}>
               <label htmlFor={field.name}>{field.label}</label>
-              <input
-                type={field.type || 'text'}
-                id={field.name}
-                name={field.name}
-                value={formData[field.name] || ''}
-                onChange={handleChange}
-                required={field.required || false}
-              />
+
+              {/* Renderizar Select o Input dependiendo del tipo */}
+              {field.type === 'select' ? (
+                <select
+                  id={field.name}
+                  name={field.name}
+                  value={formData[field.name] || ''}
+                  onChange={handleChange}
+                  required={field.required || false}
+                >
+                  <option value="">Seleccione...</option>
+                  {field.options?.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type={field.type || 'text'}
+                  id={field.name}
+                  name={field.name}
+                  value={formData[field.name] || ''}
+                  onChange={handleChange}
+                  required={field.required || false}
+                />
+              )}
             </div>
           ))}
           <div className={styles.buttonGroup}>
@@ -61,3 +77,4 @@ const Modal = ({ title, fields, onClose, onSubmit, initialData }) => {
 };
 
 export default Modal;
+
