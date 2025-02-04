@@ -5,7 +5,7 @@ import DecanosList from '../../../components/DECANOSList';
 export default function DecanosPage() {
   return (
     <DashboardLayout>
-      <DecanosList />
+      <DecanosList/>
     </DashboardLayout>
   );
 }

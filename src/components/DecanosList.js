@@ -16,6 +16,7 @@ const DECANOSList = () => {
       .then((response) => response.json())
       .then((data) => setDECANOSList(data));
   }, []);
+  
 
   const handleDelete = async (id) => {
     const confirmDelete = confirm('¿Estás seguro de eliminar este registro?');
@@ -114,7 +115,7 @@ const DECANOSList = () => {
         <tbody>
           {decanosList.map((decanos) => (
             <tr key={decanos.id}>
-              <td>{decanos.facultad}</td>
+              <td>{decanos.ocde_id}</td>
               <td>{decanos.grado}</td>
               <td>{decanos.nombreapellidodecano}</td>
               <td>{decanos.denominacion}</td>
@@ -133,7 +134,13 @@ const DECANOSList = () => {
           <Modal
           title={editingDECANOS ? 'Editar DECANOS' : 'Agregar DECANOS'}
           fields={[
-            { name: 'facultad', label: 'Facultad', type: 'text', required: true },
+            {
+              name: "ocde_id",
+              label: "Facultad",
+              type: "text",
+              required: true,
+              
+            },
             { name: 'grado', label: 'Grado', type: 'text', required: true },
             { name: 'nombreapellidodecano', label: 'Nombre y Apellido del Decano', type: 'text', required: true },
             { name: 'denominacion', label: 'Denominación', type: 'text', required: true },
