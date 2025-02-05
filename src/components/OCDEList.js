@@ -69,9 +69,9 @@ const OCDEList = () => {
   };
 
   const filteredOCDEList = ocdeList.filter((ocde) =>
-    ocde.facultad.toLowerCase().includes(searchTerm.toLowerCase())
+    ocde.facultad?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  
   const handleEdit = (ocde) => {
     setEditingOCDE(ocde); // Cargar datos al estado de edición
     setIsModalOpen(true);
@@ -138,7 +138,7 @@ const OCDEList = () => {
         <tbody>
           {ocdeList
             .filter((ocde) =>
-              ocde.facultad.toLowerCase().includes(searchTerm.toLowerCase())
+              ocde.facultad?.toLowerCase().includes(searchTerm.toLowerCase())
             )
             .map((ocde) => (
               <tr key={ocde.id}>
