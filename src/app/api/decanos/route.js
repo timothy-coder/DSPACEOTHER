@@ -4,7 +4,7 @@ import pool from '@/app/lib/db';
 export async function GET() {
   try {
     const connection = await pool.getConnection();
-    const [rows] = await connection.query('SELECT decanos.*, ocde.facultad FROM decanos JOIN ocde ON decanos.ocde_id = ocde.id; ');
+    const [rows] = await connection.query('SELECT decanos.*, ocde.facultad FROM decanos JOIN ocde ON decanos.ocde_id = ocde.id ');
     connection.release();
     return new Response(JSON.stringify(rows), {
       headers: { 'Content-Type': 'application/json' },

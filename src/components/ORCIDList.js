@@ -10,7 +10,7 @@ const ORCIDList = () => {
   const [orcidList, setORCIDList] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingORCID, setEditingORCID] = useState(null); // Estado para la edición
-
+  const [searchTerm, setSearchTerm] = useState("");
   useEffect(() => {
     fetch('/api/orcid')
       .then((response) => response.json())
@@ -56,7 +56,11 @@ const ORCIDList = () => {
     setIsModalOpen(false);
     setEditingORCID(null); // Resetear estado de edición
   };
-
+  const filteredORCIDList = orcidList.filter((orcid) =>
+    (orcid.dni && orcid.dni.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    (orcid.nombreapellido && orcid.nombreapellido.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+  
   const handleEdit = (orcid) => {
     setEditingORCID(orcid); // Cargar datos al estado de edición
     setIsModalOpen(true);
@@ -97,6 +101,13 @@ const ORCIDList = () => {
   return (
     <div>
       <h1>Lista de ORCID</h1>
+      <input
+  type="text"
+  placeholder="Buscar por DNI o Nombre y Apellido"
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+/>
+
       <button onClick={() => setIsModalOpen(true)}>Agregar Nuevo</button>
       <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} style={{ marginLeft: '10px' }} />
       <table>
@@ -109,7 +120,10 @@ const ORCIDList = () => {
           </tr>
         </thead>
         <tbody>
-          {orcidList.map((orcid) => (
+        {orcidList.filter((orcid) =>
+    (orcid.dni && orcid.dni.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    (orcid.nombreapellido && orcid.nombreapellido.toLowerCase().includes(searchTerm.toLowerCase()))
+  ).map((orcid) => (
             <tr key={orcid.id}>
               <td>{orcid.dni}</td>
               <td>{orcid.nombreapellido}</td>
