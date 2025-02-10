@@ -10,13 +10,20 @@ const DECANOSList = () => {
   const [decanosList, setDECANOSList] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDECANOS, setEditingDECANOS] = useState(null); // Estado para la edición
+  const [facultades, setFacultades] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetch('/api/decanos')
       .then((response) => response.json())
       .then((data) => setDECANOSList(data));
   }, []);
-  
+  useEffect(() => {
+    fetch("/api/ocde") // Un nuevo endpoint para obtener facultades
+      .then((res) => res.json())
+      .then((data) => setFacultades(data));
+  }, []);
+ 
 
   const handleDelete = async (id) => {
     const confirmDelete = confirm('¿Estás seguro de eliminar este registro?');
@@ -57,7 +64,7 @@ const DECANOSList = () => {
     setIsModalOpen(false);
     setEditingDECANOS(null); // Resetear estado de edición
   };
-
+  
   const handleEdit = (decanos) => {
     setEditingDECANOS(decanos); // Cargar datos al estado de edición
     setIsModalOpen(true);
@@ -94,12 +101,50 @@ const DECANOSList = () => {
       reader.readAsArrayBuffer(file);
     }
   };
+  // Descargar formato vacío
+      const handleDownloadFormat = () => {
+        const ws = XLSX.utils.json_to_sheet([
+          { facultad: '', 'grado': '', nombreapellidodecano: '', denominacion: '', modelooficio: '', estado: '' }
+        ]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Formato DECANOS');
+        XLSX.writeFile(wb, 'Formato_DECANOS.xlsx');
+      };
+    
+      // Descargar registros actuales
+      const handleDownloadRecords = () => {
+        if (decanosList.length === 0) {
+          alert('No hay registros para descargar.');
+          return;
+        }
+        const ws = XLSX.utils.json_to_sheet(decanosList.map(({ facultad, grado, nombreapellidodecano,denominacion,modelooficio,estado }) => ({
+          FACULTAD: facultad,
+          'GRADO': grado,
+          'NOMBRE Y APELLIDO DEL DECANO': nombreapellidodecano,
+          'DENOMINACION': denominacion,
+          'MODELO DE OFICIO': modelooficio,
+          'DIRECTOR O DECANO DE FACULTAD': estado,
+        })));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Lista DECANOS');
+        XLSX.writeFile(wb, 'Registros_DECANOS.xlsx');
+      };
+
+
 
   return (
     <div>
       <h1>Lista de DECANOS</h1>
+      <input
+        type="text"
+        placeholder="Buscar por Facultad"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
       <button onClick={() => setIsModalOpen(true)}>Agregar Nuevo</button>
       <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} style={{ marginLeft: '10px' }} />
+      <button onClick={handleDownloadFormat} style={{ marginLeft: '10px' }}>Descargar Formato</button>
+      <button onClick={handleDownloadRecords} style={{ marginLeft: '10px' }}>Descargar Registros</button>
       <table>
         <thead>
           <tr>
@@ -113,9 +158,12 @@ const DECANOSList = () => {
           </tr>
         </thead>
         <tbody>
-          {decanosList.map((decanos) => (
+          {decanosList.filter((decanos) =>
+            (decanos.facultad && decanos.facultad?.toLowerCase().includes(searchTerm.toLowerCase()))
+          ).map((decanos) => (
             <tr key={decanos.id}>
-              <td>{decanos.ocde_id}</td>
+              
+              <td>{decanos.facultad}</td>
               <td>{decanos.grado}</td>
               <td>{decanos.nombreapellidodecano}</td>
               <td>{decanos.denominacion}</td>
@@ -134,11 +182,16 @@ const DECANOSList = () => {
           <Modal
           title={editingDECANOS ? 'Editar DECANOS' : 'Agregar DECANOS'}
           fields={[
+            
             {
-              name: "ocde_id",
+              name: "facultad",
               label: "Facultad",
-              type: "text",
+              type: "select",
               required: true,
+              options: facultades.map((fac) => ({
+                value: fac.facultad,
+                label: fac.facultad,
+              })),
               
             },
             { name: 'grado', label: 'Grado', type: 'text', required: true },

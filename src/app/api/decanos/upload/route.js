@@ -1,4 +1,3 @@
-// src/app/api/decano/upload/route.js
 import pool from '@/app/lib/db';
 
 export async function POST(request) {
@@ -9,9 +8,18 @@ export async function POST(request) {
     // Insertar múltiples registros
     const results = await Promise.all(
       data.map(async (item) => {
-        const { ocde_id, grado, nombreapellidodecano, denominacion, modelooficio, estado } = item;
+        const { facultad, grado, nombreapellidodecano, denominacion, modelooficio, estado } = item;
 
-        // Insertar decano con referencia al ocde_id
+        // Obtener ocde_id correspondiente a la facultad
+        const [ocdeResult] = await connection.query('SELECT id FROM ocde WHERE facultad = ?', [facultad]);
+
+        if (ocdeResult.length === 0) {
+          return { error: `Facultad "${facultad}" no encontrada` };
+        }
+
+        const ocde_id = ocdeResult[0].id;
+
+        // Insertar decano con el ocde_id correcto
         const [result] = await connection.query(
           'INSERT INTO decanos (ocde_id, grado, nombreapellidodecano, denominacion, modelooficio, estado) VALUES (?, ?, ?, ?, ?, ?)',
           [ocde_id, grado, nombreapellidodecano, denominacion, modelooficio, estado]

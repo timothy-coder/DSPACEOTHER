@@ -129,9 +129,7 @@ const INVESTIGACIONESList = () => {
       <table>
         <thead>
           <tr>
-            <th>oCDE_ID</th>
-            <th>ORCID_ID</th>
-            <th>DECANO_ID</th>
+            <th>N°</th>
             <th>CODIGO</th>
             <th>TITULO</th>
             <th>AUTOR</th>
@@ -143,12 +141,16 @@ const INVESTIGACIONESList = () => {
             <th>FECHA</th>
             <th>TITULO GRADO</th>
             <th>DENOMINACION</th>
+            <th>FACULTAD</th>
+            <th>OCDE</th>
             <th>TIPO</th>
+            <th>CODIGO DE PROGRAMA</th>
             <th>PORCENTAJE OTI</th>
             <th>PORCENTAJE ASESOR</th>
             <th>JURADO 1</th>
             <th>JURADO 2</th>
             <th>JURADO 3</th>
+            <th>AUTORIDAD FIRMANTE</th>
             <th>NUMERO OFICIO REFERENCIA</th>
             <th>AUTORIZACION</th>
             <th>DENOMINACION SI O NO</th>
@@ -158,7 +160,7 @@ const INVESTIGACIONESList = () => {
             <th>OBSERVACIONES</th>
             <th>URL</th>
             <th>NUMERO DE OFICIO</th>
-            <th>CLAVES</th>
+            <th>PALABRAS CLAVES</th>
             <th>ESTADO</th>
             <th>Acciones</th>
           </tr>
@@ -178,12 +180,39 @@ const INVESTIGACIONESList = () => {
             )
             .map((investigaciones) => (
               <tr key={investigaciones.id}>
-                <td>{investigaciones.dni}</td>
-                <td>{investigaciones.dni}</td>
-                <td>{investigaciones.dni}</td>
-                <td>{investigaciones.dni}</td>
-                <td>{investigaciones.nombreapellido}</td>
-                <td>{investigaciones.orcid}</td>
+                <td>{investigaciones.id}</td>
+                <td>{investigaciones.codigo}</td>
+                <td>{investigaciones.titulo}</td>
+                <td>{investigaciones.autor}</td>
+                <td>{investigaciones.dni_autor}</td>
+                <td>{investigaciones.autor2}</td>
+                <td>{investigaciones.dni_autor2}</td>
+                <td>{investigaciones.asesor}</td>
+                <td>{investigaciones.dni_asesor}</td>
+                <td>{investigaciones.fecha}</td>
+                <td>{investigaciones.titulo_grado}</td>
+                <td>{investigaciones.denominacion}</td>
+                <td>{investigaciones.facultad}</td>
+                <td>{investigaciones.ocde}</td>
+                <td>{investigaciones.tipo}</td>
+                <td>{investigaciones.codigoprograma}</td>
+                <td>{investigaciones.porcentaje_similitud_oti}</td>
+                <td>{investigaciones.porcentaje_similitud_asesor}</td>
+                <td>{investigaciones.jurado_1}</td>
+                <td>{investigaciones.jurado_2}</td>
+                <td>{investigaciones.jurado_3}</td>
+                <td>{investigaciones.nombreapellidodecano}</td>
+                <td>{investigaciones.numero_oficio_referencia}</td>
+                <td>{investigaciones.autorizacion}</td>
+                <td>{investigaciones.denominacion_si_no}</td>
+                <td>{investigaciones.titulo_si_no}</td>
+                <td>{investigaciones.tipo_tesis_si_no}</td>
+                <td>{investigaciones.porcentaje_reporte_tesis_si_no}</td>
+                <td>{investigaciones.observaciones}</td>
+                <td>{investigaciones.url}</td>
+                <td>{investigaciones.numero_oficio}</td>
+                <td>{investigaciones.palabrasclave}</td>
+                <td>{investigaciones.estado}</td>
                 <td>
                   <button onClick={() => handleEdit(investigaciones)}>
                     Editar
@@ -193,7 +222,7 @@ const INVESTIGACIONESList = () => {
                   </button>
                 </td>
               </tr>
-              
+
             ))}
         </tbody>
       </table>
@@ -206,14 +235,183 @@ const INVESTIGACIONESList = () => {
               : "Agregar INVESTIGACIONES"
           }
           fields={[
-            { name: "dni", label: "Facultad", type: "text", required: true },
+            { name: "titulo", label: "TITULO DE LA INVESTIGACION", type: "text", required: true },
             {
-              name: "nombreapellido",
-              label: "Nombre Apellido",
+              name: "autor",
+              label: "Nombre y Apellido del Autor 1",
+              type: "text",
+              required: true,
+            }, {
+              name: "dni_autor",
+              label: "DNI del autor 1",
               type: "text",
               required: true,
             },
-            { name: "orcid", label: "Orcid", type: "text", required: true },
+            {
+              name: "autor2",
+              label: "Nombre y Apellido del Autor 2",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "dni_autor2",
+              label: "DNI del autor 2",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "nombreapellido",
+              label: "DNI del asesor",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "fecha",
+              label: "FECHA",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "titulo",
+              label: "TITULO O GRADO",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "denominacion",
+              label: "DENOMINACION",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "facultad",
+              label: "FACULTAD",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "tipo",
+              label: "TIPO DE TRABAJO",
+              type: "select",
+              required: true,
+              options: [
+                { value: 'TESIS', label: 'Tesis' },
+                { value: 'PROYECTO DE INVESTIGACION', label: 'Proyecto de investigación' },
+                { value: 'TRABAJO DE SUFICIENCIA PROFESIONAL', label: 'Trabajo de suficiencia profesional' }
+              ]
+            },
+            {
+              name: "porcentaje_similitud_oti",
+              label: "PORCENTAJE SIMILITUD OTI",
+              type: "text",
+              required: true
+            },
+            {
+              name: "porcentaje_similitud_asesor",
+              label: "PORCENTAJE SIMILITUD ASESOR",
+              type: "text",
+              required: true
+            },
+            {
+              name: "jurado_1",
+              label: "JURADO N° 1",
+              type: "text",
+              required: true
+            },
+            {
+              name: "jurado_2",
+              label: "JURADO N° 2",
+              type: "text",
+              required: true
+            },
+            {
+              name: "jurado_3",
+              label: "JURADO N° 3",
+              type: "text",
+              required: true
+            },
+            {
+              name: "nombreapellidodecano",
+              label: "Autoridad firmante",
+              type: "text",
+              required: true
+            },
+            {
+              name: "numerooficio",
+              label: "N° DE OFICIO Referencia",
+              type: "text",
+              required: true
+            },
+            {
+              name: "autorizacion",
+              label: "AUTORIZACIÓN",
+              type: "select",
+              required: true,
+              options: [
+                { value: 'ABIERTA', label: 'Abierta' },
+                { value: 'RESTRINGIDO', label: 'Restringido' },
+                { value: 'CONFIDENCIAL', label: 'Confidencial' }
+              ]
+            },
+            {
+              name: "denominacion_si_no",
+              label: "Denominación",
+              type: "select",
+              required: true,
+              options: [
+                { value: 'SI', label: 'Si' },
+                { value: 'NO', label: 'No' }
+              ]
+            },
+            {
+              name: "titulo_si_no",
+              label: "Título",
+              type: "select",
+              required: true,
+              options: [
+                { value: 'SI', label: 'Si' },
+                { value: 'NO', label: 'No' }
+              ]
+            },
+            {
+              name: "tipo_tesis_si_no",
+              label: "Tipo tesis",
+              type: "text",
+              required: true,
+              options: [
+                { value: 'SI', label: 'Si' },
+                { value: 'NO', label: 'No' }
+              ]
+            },
+            {
+              name: "observaciones",
+              label: "OBSERVACIONES",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "url",
+              label: "URL",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "numero de oficio",
+              label: "NUMERO DE OFICIO",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "estado",
+              label: "ESTADO",
+              type: "select",
+              required: true,
+              options: [
+                { value: 'OBSERVADO', label: 'Observado' },
+                { value: 'POR ENVIAR', label: 'Por enviar' },
+                { value: 'ENVIADO', label: 'Enviado' }
+              ]
+            }
           ]}
           initialData={editingINVESTIGACIONES} // Pasar datos existentes si estamos editando
           onClose={() => {

@@ -108,6 +108,31 @@ const OCDEList = () => {
       reader.readAsArrayBuffer(file);
     }
   };
+  // Descargar formato vacío
+    const handleDownloadFormat = () => {
+      const ws = XLSX.utils.json_to_sheet([
+        { facultad: '', 'ocde': '', codigoprograma: '' }
+      ]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Formato OCDE');
+      XLSX.writeFile(wb, 'Formato_OCDE.xlsx');
+    };
+  
+    // Descargar registros actuales
+    const handleDownloadRecords = () => {
+      if (ocdeList.length === 0) {
+        alert('No hay registros para descargar.');
+        return;
+      }
+      const ws = XLSX.utils.json_to_sheet(ocdeList.map(({ facultad, ocde, codigoprograma }) => ({
+        FACULTAD: facultad,
+        'OCDE': ocde,
+        'CODIGO DE PROGRAMA': codigoprograma,
+      })));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Lista OCDE');
+      XLSX.writeFile(wb, 'Registros_OCDE.xlsx');
+    };
 
   return (
     <div>
@@ -126,6 +151,8 @@ const OCDEList = () => {
         onChange={handleFileUpload}
         style={{ marginLeft: "10px" }}
       />
+      <button onClick={handleDownloadFormat} style={{ marginLeft: '10px' }}>Descargar Formato</button>
+      <button onClick={handleDownloadRecords} style={{ marginLeft: '10px' }}>Descargar Registros</button>
       <table>
         <thead>
           <tr>
@@ -163,8 +190,12 @@ const OCDEList = () => {
             {
               name: "facultad",
               label: "Facultad",
-              type: "text",
+              type: "select",
               required: true,
+              options: ocdeList.map((ocde) => ({
+                value: ocde.facultad,
+                label: ocde.facultad,
+              })),
             },
             { name: "ocde", label: "OCDE", type: "text", required: true },
             {
