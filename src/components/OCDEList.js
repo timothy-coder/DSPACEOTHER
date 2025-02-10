@@ -10,13 +10,9 @@ const OCDEList = () => {
   const [ocdeList, setOCDEList] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOCDE, setEditingOCDE] = useState(null); // Estado para la edición
-  const [facultades, setFacultades] = useState([]);
+  
   const [searchTerm, setSearchTerm] = useState("");
-  useEffect(() => {
-    fetch("/api/ocde") // Un nuevo endpoint para obtener facultades
-      .then((res) => res.json())
-      .then((data) => setFacultades(data));
-  }, []);
+  
 
   useEffect(() => {
     fetch("/api/ocde")
@@ -190,12 +186,9 @@ const OCDEList = () => {
             {
               name: "facultad",
               label: "Facultad",
-              type: "select",
+              type: "text",
               required: true,
-              options: ocdeList.map((ocde) => ({
-                value: ocde.facultad,
-                label: ocde.facultad,
-              })),
+              
             },
             { name: "ocde", label: "OCDE", type: "text", required: true },
             {

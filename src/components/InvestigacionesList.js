@@ -209,7 +209,7 @@ const INVESTIGACIONESList = () => {
                 <td>{investigaciones.tipo_tesis_si_no}</td>
                 <td>{investigaciones.porcentaje_reporte_tesis_si_no}</td>
                 <td>{investigaciones.observaciones}</td>
-                <td>{investigaciones.url}</td>
+                <td>{investigaciones.urllink}</td>
                 <td>{investigaciones.numero_oficio}</td>
                 <td>{investigaciones.palabrasclave}</td>
                 <td>{investigaciones.estado}</td>
@@ -268,11 +268,11 @@ const INVESTIGACIONESList = () => {
             {
               name: "fecha",
               label: "FECHA",
-              type: "text",
+              type: "date",
               required: true,
             },
             {
-              name: "titulo",
+              name: "titulo2",
               label: "TITULO O GRADO",
               type: "text",
               required: true,
@@ -390,7 +390,7 @@ const INVESTIGACIONESList = () => {
               required: true,
             },
             {
-              name: "url",
+              name: "urllink",
               label: "URL",
               type: "text",
               required: true,
