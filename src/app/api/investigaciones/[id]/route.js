@@ -50,7 +50,7 @@ export async function DELETE(request, { params }) {
     const { id } = params;
 
     const connection = await pool.getConnection();
-    const [result] = await connection.query('DELETE FROM decanos WHERE id = ?', [id]);
+    const [result] = await connection.query('DELETE FROM investigaciones WHERE id = ?', [id]);
     connection.release();
 
     if (result.affectedRows === 0) {
