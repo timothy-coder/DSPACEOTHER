@@ -11,10 +11,28 @@ const INVESTIGACIONESList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingINVESTIGACIONES, setEditingINVESTIGACIONES] = useState(null); // Estado para la edición
   const [searchTerm, setSearchTerm] = useState("");
+  const [facultades, setFacultades] = useState([]);
+  const [asesores, setAsesores] = useState([]);
   useEffect(() => {
-    fetch("/api/investigaciones")
-      .then((response) => response.json())
-      .then((data) => setINVESTIGACIONESList(data));
+    
+      fetch('/api/investigaciones')
+          .then((res) => res.json())
+          .then((data) => {
+              console.log('Datos cargados:', data); // Verifica si hay datos en la consola
+              setINVESTIGACIONESList(data);
+          })
+          .catch((error) => console.error('Error al cargar los datos:', error));
+  
+  
+
+    fetch("/api/ocde") // Un nuevo endpoint para obtener facultades
+      .then((res) => res.json())
+      .then((data) => setFacultades(data));
+
+    fetch("/api/orcid") // Un nuevo endpoint para obtener asesores
+      .then((res) => res.json())
+      .then((data) => setAsesores(data));
+
   }, []);
 
   const handleDelete = async (id) => {
@@ -34,7 +52,8 @@ const INVESTIGACIONESList = () => {
   const handleAddOrUpdateINVESTIGACIONES = async (formData) => {
     if (editingINVESTIGACIONES) {
       // Modo Edición
-      const response = await fetch(`/api/investigaciones/${editingORCID.id}`, {
+      const response = await fetch(`/api/investigaciones/${editingINVESTIGACIONES.id}`, {
+
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -43,7 +62,7 @@ const INVESTIGACIONESList = () => {
         const updatedINVESTIGACIONES = await response.json();
         setINVESTIGACIONESList(
           investigacionesList.map((item) =>
-            item.id === updatedORCID.id ? updatedORCID : item
+            item.id === updatedINVESTIGACIONES.id ? updatedINVESTIGACIONES : item
           )
         );
       }
@@ -64,12 +83,13 @@ const INVESTIGACIONESList = () => {
   };
   const filteredINVESTIGACIONESList = investigacionesList.filter(
     (investigaciones) =>
-      (investigaciones.dni &&
-        investigaciones.dni.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (investigaciones.nombreapellido &&
-        investigaciones.nombreapellido
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()))
+      (investigaciones.dni && investigaciones.dni.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (investigaciones.nombreapellido && investigaciones.nombreapellido.toLowerCase().includes(searchTerm.toLowerCase()))||
+      (investigaciones.titulo && investigaciones.titulo.toLowerCase().includes(searchTerm.toLowerCase()))||
+      (investigaciones.dni_autor && investigaciones.dni_autor.toLowerCase().includes(searchTerm.toLowerCase()))||
+      (investigaciones.autor && investigaciones.autor.toLowerCase().includes(searchTerm.toLowerCase()))||
+      (investigaciones.dni_autor2 && investigaciones.dni_autor2.toLowerCase().includes(searchTerm.toLowerCase()))||
+      (investigaciones.autor2 && investigaciones.autor2.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleEdit = (investigaciones) => {
@@ -169,14 +189,13 @@ const INVESTIGACIONESList = () => {
           {investigacionesList
             .filter(
               (investigaciones) =>
-                (investigaciones.dni &&
-                  investigaciones.dni
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase())) ||
-                (investigaciones.nombreapellido &&
-                  investigaciones.nombreapellido
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase()))
+                (investigaciones.orcid_dni && investigaciones.orcid_dni.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (investigaciones.nombreapellido && investigaciones.nombreapellido.toLowerCase().includes(searchTerm.toLowerCase()))||
+                (investigaciones.titulo && investigaciones.titulo.toLowerCase().includes(searchTerm.toLowerCase()))||
+                (investigaciones.dni_autor && investigaciones.dni_autor.toLowerCase().includes(searchTerm.toLowerCase()))||
+                (investigaciones.autor && investigaciones.autor.toLowerCase().includes(searchTerm.toLowerCase()))||
+                (investigaciones.dni_autor2 && investigaciones.dni_autor2.toLowerCase().includes(searchTerm.toLowerCase()))||
+                (investigaciones.autor2 && investigaciones.autor2.toLowerCase().includes(searchTerm.toLowerCase()))
             )
             .map((investigaciones) => (
               <tr key={investigaciones.id}>
@@ -187,8 +206,8 @@ const INVESTIGACIONESList = () => {
                 <td>{investigaciones.dni_autor}</td>
                 <td>{investigaciones.autor2}</td>
                 <td>{investigaciones.dni_autor2}</td>
-                <td>{investigaciones.asesor}</td>
-                <td>{investigaciones.dni_asesor}</td>
+                <td>{investigaciones.orcid_nombreapellido}</td>
+                <td>{investigaciones.orcid_dni}</td>
                 <td>{investigaciones.fecha}</td>
                 <td>{investigaciones.titulo_grado}</td>
                 <td>{investigaciones.denominacion}</td>
@@ -220,6 +239,9 @@ const INVESTIGACIONESList = () => {
                   <button onClick={() => handleDelete(investigaciones.id)}>
                     Eliminar
                   </button>
+                  <button onClick={() => handlePrint()}>
+                    Imprimir
+                  </button>
                 </td>
               </tr>
 
@@ -236,58 +258,26 @@ const INVESTIGACIONESList = () => {
           }
           fields={[
             { name: "titulo", label: "TITULO DE LA INVESTIGACION", type: "text", required: true },
+            { name: "autor", label: "Nombre y Apellido del Autor 1", type: "text", required: true },
+            { name: "dni_autor", label: "DNI del autor 1", type: "text", required: true },
+            { name: "autor2", label: "Nombre y Apellido del Autor 2", type: "text" },
+            { name: "dni_autor2", label: "DNI del autor 2", type: "text" },
             {
-              name: "autor",
-              label: "Nombre y Apellido del Autor 1",
-              type: "text",
-              required: true,
-            }, {
-              name: "dni_autor",
-              label: "DNI del autor 1",
-              type: "text",
-              required: true,
+              name: "nombreapellido", label: "NOMBRE del asesor", type: "select", required: true,
+              options: asesores.map((ase) => ({
+                value: ase.nombreapellido,
+                label: ase.nombreapellido,
+              })),
             },
+            { name: "fecha", label: "FECHA", type: "date", required: true },
+            { name: "titulo_grado", label: "TITULO O GRADO", type: "text", required: true, },
+            { name: "denominacion", label: "DENOMINACION", type: "text", required: true, },
             {
-              name: "autor2",
-              label: "Nombre y Apellido del Autor 2",
-              type: "text",
-              required: true,
-            },
-            {
-              name: "dni_autor2",
-              label: "DNI del autor 2",
-              type: "text",
-              required: true,
-            },
-            {
-              name: "nombreapellido",
-              label: "DNI del asesor",
-              type: "text",
-              required: true,
-            },
-            {
-              name: "fecha",
-              label: "FECHA",
-              type: "date",
-              required: true,
-            },
-            {
-              name: "titulo2",
-              label: "TITULO O GRADO",
-              type: "text",
-              required: true,
-            },
-            {
-              name: "denominacion",
-              label: "DENOMINACION",
-              type: "text",
-              required: true,
-            },
-            {
-              name: "facultad",
-              label: "FACULTAD",
-              type: "text",
-              required: true,
+              name: "facultad", label: "FACULTAD", type: "select", required: true,
+              options: facultades.map((fac) => ({
+                value: fac.facultad,
+                label: fac.facultad,
+              })),
             },
             {
               name: "tipo",
@@ -303,13 +293,13 @@ const INVESTIGACIONESList = () => {
             {
               name: "porcentaje_similitud_oti",
               label: "PORCENTAJE SIMILITUD OTI",
-              type: "text",
+              type: "number",
               required: true
             },
             {
               name: "porcentaje_similitud_asesor",
               label: "PORCENTAJE SIMILITUD ASESOR",
-              type: "text",
+              type: "number",
               required: true
             },
             {
@@ -337,9 +327,9 @@ const INVESTIGACIONESList = () => {
               required: true
             },
             {
-              name: "numerooficio",
+              name: "numero_oficio_referencia",
               label: "N° DE OFICIO Referencia",
-              type: "text",
+              type: "number",
               required: true
             },
             {
@@ -376,7 +366,17 @@ const INVESTIGACIONESList = () => {
             {
               name: "tipo_tesis_si_no",
               label: "Tipo tesis",
-              type: "text",
+              type: "select",
+              required: true,
+              options: [
+                { value: 'SI', label: 'Si' },
+                { value: 'NO', label: 'No' }
+              ]
+            },
+            {
+              name: "porcentaje_reporte_tesis_si_no",
+              label: "Tipo porcentaje",
+              type: "select",
               required: true,
               options: [
                 { value: 'SI', label: 'Si' },
@@ -396,8 +396,14 @@ const INVESTIGACIONESList = () => {
               required: true,
             },
             {
-              name: "numero de oficio",
+              name: "numero_oficio",
               label: "NUMERO DE OFICIO",
+              type: "number",
+              required: true,
+            },
+            {
+              name: "palabrasclave",
+              label: "PALABRAS CLAVE",
               type: "text",
               required: true,
             },

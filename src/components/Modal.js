@@ -39,11 +39,12 @@ const Modal = ({ title, fields, onClose, onSubmit, initialData }) => {
                     required={field.required || false}
                   >
                     <option value="">Seleccione...</option>
-                    {field.options?.map((option) => (
-                      <option key={option.value} value={option.value}>
+                    {field.options?.map((option, index) => (
+                      <option key={option.value || index} value={option.value}>
                         {option.label}
                       </option>
                     ))}
+
                   </select>
                 ) : field.type === 'checkbox' ? (
                   <input
