@@ -48,7 +48,7 @@ const INVESTIGACIONESList = () => {
       );
     }
   };
-
+  
   const handleAddOrUpdateINVESTIGACIONES = async (formData) => {
     if (editingINVESTIGACIONES) {
       // Modo Edición
@@ -128,6 +128,66 @@ const INVESTIGACIONESList = () => {
       reader.readAsArrayBuffer(file);
     }
   };
+  // Descargar formato vacío
+        const handleDownloadFormat = () => {
+          const ws = XLSX.utils.json_to_sheet([
+            { facultad: '', 'grado': '', nombreapellidodecano: '', denominacion: '', modelooficio: '', estado: '' }
+          ]);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Formato DECANOS');
+          XLSX.writeFile(wb, 'Formato_DECANOS.xlsx');
+        };
+      
+        // Descargar registros actuales
+        const handleDownloadRecords = () => {
+          if (investigacionesList.length === 0) {
+            alert('No hay registros para descargar.');
+            return;
+          }
+          
+          const ws = XLSX.utils.json_to_sheet(
+            investigacionesList.map(({ codigo, titulo, autor, dni_autor, autor2, dni_autor2, orcid_nombreapellido, orcid_dni, fecha, titulo_grado, denominacion, facultad, ocde, tipo, codigoprograma, porcentaje_similitud_oti, porcentaje_similitud_asesor, jurado_1, jurado_2, jurado_3, nombreapellidodecano, numero_oficio_referencia, autorizacion, denominacion_si_no, titulo_si_no, tipo_tesis_si_no, porcentaje_reporte_tesis_si_no, observaciones, urllink, numero_oficio, palabrasclave, estado }) => ({
+              'CÓDIGO': codigo,
+              'TÍTULO': titulo,
+              'AUTOR': autor,
+              'DNI AUTOR': dni_autor,
+              'AUTOR 2': autor2,
+              'DNI AUTOR 2': dni_autor2,
+              'ASESOR': orcid_nombreapellido,
+              'DNI ASESOR': orcid_dni,
+              'FECHA': fecha ? new Date(fecha).toLocaleDateString() : '',
+              'TÍTULO GRADO': titulo_grado,
+              'DENOMINACIÓN': denominacion,
+              'FACULTAD': facultad,
+              'OCDE': ocde,
+              'TIPO': tipo,
+              'CÓDIGO DE PROGRAMA': codigoprograma,
+              'PORCENTAJE OTI': porcentaje_similitud_oti,
+              'PORCENTAJE ASESOR': porcentaje_similitud_asesor,
+              'JURADO 1': jurado_1,
+              'JURADO 2': jurado_2,
+              'JURADO 3': jurado_3,
+              'AUTORIDAD FIRMANTE': nombreapellidodecano,
+              'NÚMERO OFICIO REFERENCIA': numero_oficio_referencia,
+              'AUTORIZACIÓN': autorizacion,
+              'DENOMINACIÓN SI O NO': denominacion_si_no,
+              'TÍTULO SI O NO': titulo_si_no,
+              'TIPO TESIS SI O NO': tipo_tesis_si_no,
+              'PORCENTAJE REPORTE SI O NO': porcentaje_reporte_tesis_si_no,
+              'OBSERVACIONES': observaciones,
+              'URL': urllink,
+              'NÚMERO DE OFICIO': numero_oficio,
+              'PALABRAS CLAVES': palabrasclave,
+              'ESTADO': estado
+            }))
+          );
+        
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Lista Investigaciones');
+          XLSX.writeFile(wb, 'Registros_Investigaciones.xlsx');
+        };
+        
+  
 
   return (
     <div>
@@ -146,6 +206,8 @@ const INVESTIGACIONESList = () => {
         onChange={handleFileUpload}
         style={{ marginLeft: "10px" }}
       />
+      <button onClick={handleDownloadFormat} style={{ marginLeft: '10px' }}>Descargar Formato</button>
+      <button onClick={handleDownloadRecords} style={{ marginLeft: '10px' }}>Descargar Registros</button>
       <table>
         <thead>
           <tr>
@@ -197,9 +259,9 @@ const INVESTIGACIONESList = () => {
                 (investigaciones.dni_autor2 && investigaciones.dni_autor2.toLowerCase().includes(searchTerm.toLowerCase()))||
                 (investigaciones.autor2 && investigaciones.autor2.toLowerCase().includes(searchTerm.toLowerCase()))
             )
-            .map((investigaciones) => (
+            .map((investigaciones,index) => (
               <tr key={investigaciones.id}>
-                <td>{investigaciones.id}</td>
+                <td>{index+1}</td>
                 <td>{investigaciones.codigo}</td>
                 <td>{investigaciones.titulo}</td>
                 <td>{investigaciones.autor}</td>
@@ -208,7 +270,7 @@ const INVESTIGACIONESList = () => {
                 <td>{investigaciones.dni_autor2}</td>
                 <td>{investigaciones.orcid_nombreapellido}</td>
                 <td>{investigaciones.orcid_dni}</td>
-                <td>{investigaciones.fecha}</td>
+                <td>{new Date(investigaciones.fecha).toISOString().split('T')[0]}</td>
                 <td>{investigaciones.titulo_grado}</td>
                 <td>{investigaciones.denominacion}</td>
                 <td>{investigaciones.facultad}</td>
@@ -259,9 +321,9 @@ const INVESTIGACIONESList = () => {
           fields={[
             { name: "titulo", label: "TITULO DE LA INVESTIGACION", type: "text", required: true },
             { name: "autor", label: "Nombre y Apellido del Autor 1", type: "text", required: true },
-            { name: "dni_autor", label: "DNI del autor 1", type: "text", required: true },
-            { name: "autor2", label: "Nombre y Apellido del Autor 2", type: "text" },
-            { name: "dni_autor2", label: "DNI del autor 2", type: "text" },
+            { name: "dni_autor", label: "DNI del autor 1", type: "number", required: true },
+            { name: "autor2", label: "Nombre y Apellido del Autor 2", type: "text",required: true },
+            { name: "dni_autor2", label: "DNI del autor 2", type: "number" ,required: true},
             {
               name: "nombreapellido", label: "NOMBRE del asesor", type: "select", required: true,
               options: asesores.map((ase) => ({
@@ -321,12 +383,6 @@ const INVESTIGACIONESList = () => {
               required: true
             },
             {
-              name: "nombreapellidodecano",
-              label: "Autoridad firmante",
-              type: "text",
-              required: true
-            },
-            {
               name: "numero_oficio_referencia",
               label: "N° DE OFICIO Referencia",
               type: "number",
@@ -338,7 +394,7 @@ const INVESTIGACIONESList = () => {
               type: "select",
               required: true,
               options: [
-                { value: 'ABIERTA', label: 'Abierta' },
+                { value: 'ABIERTO', label: 'Abierto' },
                 { value: 'RESTRINGIDO', label: 'Restringido' },
                 { value: 'CONFIDENCIAL', label: 'Confidencial' }
               ]

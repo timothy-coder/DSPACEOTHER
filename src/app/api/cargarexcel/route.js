@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   try {
     const {
-      titulo, autor1, dniAutor1, autor2, dniAutor2, asesor, dniAsesor, facultad,
+      titulo, autor, dni_autor, autor2, dni_autor2, nombreapellido, facultad,
       grado, tipoTrabajo, jurado1, jurado2, jurado3, gradoAcademico, palabrasClave,
     } = req.body;
 
@@ -17,7 +17,9 @@ export default async function handler(req, res) {
                       gradoAcademico.toLowerCase().startsWith("doctor") || gradoAcademico.toLowerCase().startsWith("doctora") ? "D" : "T";
 
     // Generar código de investigación
-    const codigo = `T010_${dniAutor1}_${gradoCodigo}`;
+    const codigo1 = `T010_${dni_autor}_${gradoCodigo}`;
+    const codigo2 = autor2 && dni_autor2 ? `T010_${dni_autor2}_${gradoCodigo}` : null;
+    const codigo = codigo1 + (codigo2 ? `, ${codigo2}` : "");
 
     // Obtener ocde_id por facultad
     const [ocdeResult] = await pool.query("SELECT id FROM ocde WHERE facultad = ?", [facultad]);
@@ -25,7 +27,7 @@ export default async function handler(req, res) {
     const ocde_id = ocdeResult[0].id;
 
     // Obtener orcid_id del asesor
-    const [asesorResult] = await pool.query("SELECT id FROM orcid WHERE dni = ?", [dniAsesor]);
+    const [asesorResult] = await pool.query("SELECT id FROM orcid WHERE nombreapellido = ?", [nombreapellido]);
     if (asesorResult.length === 0) return res.status(400).json({ message: "No se encontraron datos del asesor." });
     const orcid_id = asesorResult[0].id;
 
@@ -37,9 +39,9 @@ export default async function handler(req, res) {
     // Insertar en la base de datos
     await pool.query(
       `INSERT INTO investigaciones 
-      (ocde_id, orcid_id, decano_id, codigo, titulo, autor, dni_autor, autor2, dni_autor2, asesor, dni_asesor, fecha, titulo_grado, denominacion, tipo, jurado_1, jurado_2, jurado_3, palabrasclave, estado)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, 'activo')`,
-      [ocde_id, orcid_id, decano_id, codigo, titulo, autor1, dniAutor1, autor2, dniAutor2, asesor, dniAsesor, grado, gradoAcademico, tipoTrabajo, jurado1, jurado2, jurado3, palabrasClave]
+      (ocde_id, orcid_id, decano_id, codigo, titulo, autor, dni_autor, autor2, dni_autor2, asesor, dni_asesor, titulo_grado, denominacion, tipo, jurado_1, jurado_2, jurado_3, palabrasclave, estado)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Por Enviar')`,
+      [ocde_id, orcid_id, decano_id, codigo, titulo, autor, dni_autor, autor2, dni_autor2, orcid_nombreapellido, dniAsesor, grado, gradoAcademico, tipoTrabajo, jurado1, jurado2, jurado3, palabrasClave]
     );
 
     res.status(200).json({ message: "Datos insertados correctamente" });

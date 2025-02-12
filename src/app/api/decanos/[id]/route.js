@@ -15,7 +15,7 @@ export async function PUT(request) {
     // Obtener ocde_id correspondiente a la facultad
     const connection = await pool.getConnection();
     const [ocdeResult] = await connection.query('SELECT id FROM ocde WHERE facultad = ?', [facultad]);
-
+    
     if (ocdeResult.length === 0) {
       connection.release();
       return new Response(JSON.stringify({ error: 'Facultad no encontrada' }), { status: 400 });

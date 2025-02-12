@@ -62,11 +62,11 @@ export async function POST(request) {
 
             // Generar el código basado en el grado académico
             let gradoCodigo = "";
-            if (titulo_grado.toLowerCase().startsWith("especialista")) {
+            if (denominacion.toLowerCase().startsWith("especialista")) {
                 gradoCodigo = "S";
-            } else if (titulo_grado.toLowerCase().startsWith("maestro") || titulo_grado.toLowerCase().startsWith("maestra")) {
+            } else if (denominacion.toLowerCase().startsWith("maestro") || denominacion.toLowerCase().startsWith("maestra")) {
                 gradoCodigo = "M";
-            } else if (titulo_grado.toLowerCase().startsWith("doctor") || titulo_grado.toLowerCase().startsWith("doctora")) {
+            } else if (denominacion.toLowerCase().startsWith("doctor") || denominacion.toLowerCase().startsWith("doctora")) {
                 gradoCodigo = "D";
             } else {
                 gradoCodigo = "T"; // Si no es especialista, maestro, maestra, doctor o doctora, asignamos 'T'

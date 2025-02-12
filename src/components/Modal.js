@@ -5,8 +5,21 @@ const Modal = ({ title, fields, onClose, onSubmit, initialData }) => {
   const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    setFormData(initialData || {});
-  }, [initialData]);
+    if (initialData) {
+      const formattedData = { ...initialData };
+
+      // Convertir la fecha al formato yyyy-MM-dd si es necesario
+      Object.keys(formattedData).forEach((key) => {
+        if (fields.find((field) => field.name === key && field.type === 'date')) {
+          formattedData[key] = formattedData[key] ? formattedData[key].split('T')[0] : '';
+        }
+      });
+
+      setFormData(formattedData);
+    } else {
+      setFormData({});
+    }
+  }, [initialData, fields]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -44,7 +57,6 @@ const Modal = ({ title, fields, onClose, onSubmit, initialData }) => {
                         {option.label}
                       </option>
                     ))}
-
                   </select>
                 ) : field.type === 'checkbox' ? (
                   <input
