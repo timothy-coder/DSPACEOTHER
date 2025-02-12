@@ -22,11 +22,12 @@ export async function POST(request) {
         const id = url.pathname.split('/').pop(); // Extraer el ID de la URL
 
         if (!id) {
-            return new Response(JSON.stringify({ error: 'ID no proporcionado' }), { status: 400 });
+            return new Response(JSON.stringify({ error: 'ID no válido' }), { status: 400 });
         }
 
+
         const {
-            facultad, nombreapellido, titulo, autor,dni_autor, autor2, dni_autor2, fecha, titulo_grado, denominacion, tipo,
+            facultad, nombreapellido, titulo, autor, dni_autor, autor2, dni_autor2, fecha, titulo_grado, denominacion, tipo,
             porcentaje_similitud_oti, porcentaje_similitud_asesor, jurado_1, jurado_2, jurado_3,
             numero_oficio_referencia, autorizacion, denominacion_si_no, titulo_si_no, tipo_tesis_si_no,
             porcentaje_reporte_tesis_si_no, observaciones, urllink, numero_oficio, palabrasclave, estado
@@ -75,7 +76,7 @@ export async function POST(request) {
             // Generar los códigos para los autores
             const codigo1 = `T010_${dni_autor}_${gradoCodigo}`; // Código para el primer autor
             const codigo2 = autor2 && dni_autor2 ? `T010_${dni_autor2}_${gradoCodigo}` : null; // Código para el segundo autor (si existe)
-            const codigo=codigo1 + (codigo2 ? `, ${codigo2}` : "");
+            const codigo = codigo1 + (codigo2 ? `, ${codigo2}` : "");
             // Insertar la investigación en la base de datos
             const [result] = await connection.query(
                 `INSERT INTO investigaciones (
@@ -86,7 +87,7 @@ export async function POST(request) {
                     numero_oficio, palabrasclave, estado
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    ocde_id, orcid_id, decano_id, codigo, titulo, autor,dni_autor, autor2, dni_autor2, fecha, titulo_grado,
+                    ocde_id, orcid_id, decano_id, codigo, titulo, autor, dni_autor, autor2, dni_autor2, fecha, titulo_grado,
                     denominacion, tipo, porcentaje_similitud_oti, porcentaje_similitud_asesor, jurado_1, jurado_2,
                     jurado_3, numero_oficio_referencia, autorizacion, denominacion_si_no, titulo_si_no, tipo_tesis_si_no,
                     porcentaje_reporte_tesis_si_no, observaciones, urllink, numero_oficio, palabrasclave, estado
