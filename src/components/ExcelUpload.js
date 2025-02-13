@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 
-export default function ExcelUpload({ file }) {
+export default function ExcelUpload({ file}) {
   const [excelData, setExcelData] = useState({
     titulo: "", autor1: "", dniAutor1: "", autor2: "", dniAutor2: "",
     asesor: "", dniAsesor: "", orcid: "", grado: "", institucion: "",
     facultad: "", tipoTrabajo: "", jurado1: "", jurado2: "", jurado3: "",
     gradoAcademico: "", palabrasClave: "",
   });
-
+  const [facultades, setFacultades] = useState([]);
+  const [asesores, setAsesores] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  
   useEffect(() => {
     if (file) {
       const reader = new FileReader();
@@ -32,9 +33,16 @@ export default function ExcelUpload({ file }) {
       };
       reader.readAsArrayBuffer(file);
     }
+
+    fetch("/api/ocde") // Un nuevo endpoint para obtener facultades
+    .then((res) => res.json())
+    .then((data) => setFacultades(data));
+
+  fetch("/api/orcid") // Un nuevo endpoint para obtener asesores
+    .then((res) => res.json())
+    .then((data) => setAsesores(data));
   }, [file]);
 
-  // Manejar cambios en los campos editables
   const handleChange = (e) => {
     const { name, value } = e.target;
     setExcelData((prevData) => ({ ...prevData, [name]: value }));
@@ -43,14 +51,12 @@ export default function ExcelUpload({ file }) {
   const handleSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-
     try {
-      const response = await fetch("/api/insertTesis", {
+      const response = await fetch("/api/cargarexcel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(excelData),
       });
-
       if (response.ok) {
         alert("Datos enviados correctamente");
       } else {
@@ -71,13 +77,29 @@ export default function ExcelUpload({ file }) {
         {Object.entries(excelData).map(([key, value]) => (
           <div key={key} className="flex flex-col">
             <label className="text-sm font-semibold capitalize">{key.replace(/([A-Z])/g, " $1")}:</label>
-            <input
-              type="text"
-              name={key}
-              value={value}
-              onChange={handleChange}
-              className="border p-2 rounded-md"
-            />
+            {key === "asesor" ? (
+              <select name={key} value={value} onChange={handleChange} className="border p-2 rounded-md">
+                <option value="">Seleccione un asesor</option>
+                {asesores.map((ase) => (
+                  <option key={ase.nombreapellido} value={ase.nombreapellido}>{ase.nombreapellido}</option>
+                ))}
+              </select>
+            ) : key === "facultad" ? (
+              <select name={key} value={value} onChange={handleChange} className="border p-2 rounded-md">
+                <option value="">Seleccione una facultad</option>
+                {facultades.map((fac) => (
+                  <option key={fac.facultad} value={fac.facultad}>{fac.facultad}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                name={key}
+                value={value}
+                onChange={handleChange}
+                className="border p-2 rounded-md"
+              />
+            )}
           </div>
         ))}
       </div>
