@@ -1,52 +1,92 @@
 import pool from '@/app/lib/db';
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Método no permitido" });
-  }
-
+export async function POST(request) {
   try {
-    const {
-      titulo, autor, dni_autor, autor2, dni_autor2, nombreapellido, facultad,
-      grado, tipoTrabajo, jurado1, jurado2, jurado3, gradoAcademico, palabrasClave,
-    } = req.body;
+      const url = new URL(request.url);
+      const id = url.pathname.split('/').pop(); // Extraer el ID de la URL
 
-    // Generar código basado en el grado académico
-    let gradoCodigo = gradoAcademico.toLowerCase().startsWith("especialista") ? "S" :
-                      gradoAcademico.toLowerCase().startsWith("maestro") || gradoAcademico.toLowerCase().startsWith("maestra") ? "M" :
-                      gradoAcademico.toLowerCase().startsWith("doctor") || gradoAcademico.toLowerCase().startsWith("doctora") ? "D" : "T";
+      if (!id) {
+          return new Response(JSON.stringify({ error: 'ID no válido' }), { status: 400 });
+      }
 
-    // Generar código de investigación
-    const codigo1 = `T010_${dni_autor}_${gradoCodigo}`;
-    const codigo2 = autor2 && dni_autor2 ? `T010_${dni_autor2}_${gradoCodigo}` : null;
-    const codigo = codigo1 + (codigo2 ? `, ${codigo2}` : "");
 
-    // Obtener ocde_id por facultad
-    const [ocdeResult] = await pool.query("SELECT id FROM ocde WHERE facultad = ?", [facultad]);
-    if (ocdeResult.length === 0) return res.status(400).json({ message: "No se encontraron valores de OCDE." });
-    const ocde_id = ocdeResult[0].id;
+      const {
+        titulo, autor, dni_autor,autor2, dni_autor2, asesor,dni_asesor, orcid, denominacion, facultad, tipo,jurado_1, jurado_2, jurado_3, titulo_grado, palabrasClave
+      } = await request.json();
 
-    // Obtener orcid_id del asesor
-    const [asesorResult] = await pool.query("SELECT id FROM orcid WHERE nombreapellido = ?", [nombreapellido]);
-    if (asesorResult.length === 0) return res.status(400).json({ message: "No se encontraron datos del asesor." });
-    const orcid_id = asesorResult[0].id;
+      // Obtener conexión a la base de datos
+      const connection = await pool.getConnection();
 
-    // Obtener decano_id basado en la facultad
-    const [decanoResult] = await pool.query("SELECT id FROM decanos WHERE ocde_id = ?", [ocde_id]);
-    if (decanoResult.length === 0) return res.status(400).json({ message: "No se encontró un decano para la facultad." });
-    const decano_id = decanoResult[0].id;
+      try {
+          // Obtener ocde_id correspondiente a la facultad
+          const [ocdeResult] = await connection.query('SELECT id FROM ocde WHERE facultad = ?', [facultad]);
+          if (ocdeResult.length === 0) {
+              return new Response(JSON.stringify({ error: 'Facultad no encontrada' }), { status: 400 });
+          }
+          const ocde_id = ocdeResult[0].id;
 
-    // Insertar en la base de datos
-    await pool.query(
-      `INSERT INTO investigaciones 
-      (ocde_id, orcid_id, decano_id, codigo, titulo, autor, dni_autor, autor2, dni_autor2, asesor, dni_asesor, titulo_grado, denominacion, tipo, jurado_1, jurado_2, jurado_3, palabrasclave, estado)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Por Enviar')`,
-      [ocde_id, orcid_id, decano_id, codigo, titulo, autor, dni_autor, autor2, dni_autor2, orcid_nombreapellido, dniAsesor, grado, gradoAcademico, tipoTrabajo, jurado1, jurado2, jurado3, palabrasClave]
-    );
+          // Obtener orcid_id correspondiente al asesor
+          const [orcidResult] = await connection.query('SELECT id FROM orcid WHERE dni = ?', [dni_asesor]);
+          if (orcidResult.length === 0) {
+              return new Response(JSON.stringify({ error: 'Asesor no encontrado' }), { status: 400 });
+          }
+          const orcid_id = orcidResult[0].id;
 
-    res.status(200).json({ message: "Datos insertados correctamente" });
+          // Obtener decano_id correspondiente a la facultad
+          const [decanoResult] = await connection.query(
+              'SELECT d.id FROM decanos d JOIN ocde o ON d.ocde_id = o.id WHERE o.facultad = ?;',
+              [facultad]
+          );
+          if (decanoResult.length === 0) {
+              return new Response(JSON.stringify({ error: 'Facultad no encontrada' }), { status: 400 });
+          }
+          const decano_id = decanoResult[0].id;
+
+          // Generar el código basado en el grado académico
+          let gradoCodigo = "";
+          if (denominacion.toLowerCase().startsWith("especialista")) {
+              gradoCodigo = "S";
+          } else if (denominacion.toLowerCase().startsWith("maestro") || denominacion.toLowerCase().startsWith("maestra")) {
+              gradoCodigo = "M";
+          } else if (denominacion.toLowerCase().startsWith("doctor") || denominacion.toLowerCase().startsWith("doctora")) {
+              gradoCodigo = "D";
+          } else {
+              gradoCodigo = "T"; // Si no es especialista, maestro, maestra, doctor o doctora, asignamos 'T'
+          }
+
+          // Generar los códigos para los autores
+          const codigo1 = `T010_${dni_autor}_${gradoCodigo}`; // Código para el primer autor
+          const codigo2 = autor2 && dni_autor2 ? `T010_${dni_autor2}_${gradoCodigo}` : null; // Código para el segundo autor (si existe)
+          const codigo = codigo1 + (codigo2 ? `, ${codigo2}` : "");
+          // Insertar la investigación en la base de datos
+          const [result] = await connection.query(
+              `INSERT INTO investigaciones (
+                  ocde_id, orcid_id, decano_id, codigo, titulo, autor,dni_autor, autor2, dni_autor2, fecha,
+                  titulo_grado, denominacion, tipo, porcentaje_similitud_oti, porcentaje_similitud_asesor,
+                  jurado_1, jurado_2, jurado_3, numero_oficio_referencia, autorizacion, denominacion_si_no,
+                  titulo_si_no, tipo_tesis_si_no, porcentaje_reporte_tesis_si_no, observaciones, urllink,
+                  numero_oficio, palabrasclave, estado
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                  ocde_id, orcid_id, decano_id, codigo, titulo, autor, dni_autor, autor2, dni_autor2, fecha, titulo_grado,
+                  denominacion, tipo, porcentaje_similitud_oti, porcentaje_similitud_asesor, jurado_1, jurado_2,
+                  jurado_3, numero_oficio_referencia, autorizacion, denominacion_si_no, titulo_si_no, tipo_tesis_si_no,
+                  porcentaje_reporte_tesis_si_no, observaciones, urllink, numero_oficio, palabrasclave, estado
+              ]
+          );
+
+          if (result.affectedRows === 0) {
+              return new Response(JSON.stringify({ error: 'Registro no insertado' }), { status: 404 });
+          }
+
+          return new Response(JSON.stringify({ success: true }), {
+              headers: { 'Content-Type': 'application/json' },
+          });
+      } finally {
+          connection.release(); // Liberar la conexión dentro del bloque `finally`
+      }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error al insertar los datos" });
+      console.error('Error en la inserción:', error);
+      return new Response(JSON.stringify({ error: 'Error en la inserción' }), { status: 500 });
   }
 }

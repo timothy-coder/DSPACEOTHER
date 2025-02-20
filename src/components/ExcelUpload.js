@@ -23,12 +23,12 @@ export default function ExcelUpload({ file}) {
         const getCellValue = (cell) => (firstSheet[cell] ? firstSheet[cell].v : "");
 
         setExcelData({
-          titulo: getCellValue("C7"), autor1: getCellValue("C11"), dniAutor1: getCellValue("C14"),
-          autor2: getCellValue("C16"), dniAutor2: getCellValue("C19"), asesor: getCellValue("C21"),
-          dniAsesor: getCellValue("C24"), orcid: getCellValue("C26"), grado: getCellValue("C30"),
-          institucion: getCellValue("B36"), facultad: getCellValue("C38"), tipoTrabajo: getCellValue("C42"),
-          jurado1: getCellValue("C45"), jurado2: getCellValue("C46"), jurado3: getCellValue("C47"),
-          gradoAcademico: getCellValue("C50"), palabrasClave: getCellValue("C53"),
+          titulo: getCellValue("C7"), autor: getCellValue("C11"), dni_autor: getCellValue("C14"),
+          autor2: getCellValue("C16"), dni_autor2: getCellValue("C19"), asesor: getCellValue("C21"),
+          dni_asesor: getCellValue("C24"), orcid: getCellValue("C26"), denominacion: getCellValue("C30"),
+          institucion: getCellValue("B36"), facultad: getCellValue("C38"), tipo: getCellValue("C42"),
+          jurado_1: getCellValue("C45"), jurado_2: getCellValue("C46"), jurado_3: getCellValue("C47"),
+          titulo_grado: getCellValue("C50"), palabrasClave: getCellValue("C53"),
         });
       };
       reader.readAsArrayBuffer(file);
