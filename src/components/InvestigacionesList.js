@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Modal from "./Modal";
 import * as XLSX from "xlsx";
+import PizZip from "pizzip";
+import Docxtemplater from "docxtemplater";
+import { saveAs } from "file-saver";
 
 const INVESTIGACIONESList = () => {
   const [investigacionesList, setINVESTIGACIONESList] = useState([]);
@@ -48,7 +51,66 @@ const INVESTIGACIONESList = () => {
       );
     }
   };
+  const handlePrint = (item) => {
+   
+    // Usar fetch para obtener el archivo binario
+    fetch("/images/modelo.docx")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Error al cargar el archivo");
+        }
+        return response.arrayBuffer();
+      })
+      .then((content) => {
+        // Crear un PizZip a partir del contenido del archivo
+        const zip = new PizZip(content);
   
+        // Crear una instancia de Docxtemplater con el archivo cargado
+        const doc = new Docxtemplater(zip, {
+          paragraphLoop: true,
+          linebreaks: true,
+        });
+  
+        // Pasar los datos dinámicos al documento
+        doc.setData({
+          fecha: item.fecha,
+          numero_oficio: item.numero_oficio,
+          decano: item.asesor,
+          oficio_referencia: item.numero_oficio_referencia || 'No disponible',  // Valor por defecto
+          codigo: item.codigo,
+          titulo: item.titulo,
+          autor: item.autor,
+          dni_autor: item.dni_autor,
+          similitud: item.porcentaje_similitud_oti,
+          titulo_grado: item.titulo_grado,
+          facultad: item.facultad,
+          url: item.url,
+          autoridad_firmante: item.asesor,
+          cargo_autoridad: item.asesor,
+        });
+  
+        try {
+          // Renderizar el documento con los datos
+          doc.render();
+        } catch (renderError) {
+          console.error("Error al renderizar el documento:", renderError);
+          return;
+        }
+  
+        // Exportar el archivo modificado
+        const output = doc.getZip().generate({
+          type: "blob",
+          mimeType:
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        });
+  
+        // Descargar el archivo generado
+        saveAs(output, `OFICIO N° ${item.numero_oficio}-2025-JEF-OTI-RI-UNCP.docx`);
+      })
+      .catch((error) => {
+        console.error("Error al cargar el archivo:", error);
+      });
+  };
   const handleAddOrUpdateINVESTIGACIONES = async (formData) => {
     if (editingINVESTIGACIONES) {
       // Modo Edición

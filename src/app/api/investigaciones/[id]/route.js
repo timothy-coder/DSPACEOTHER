@@ -99,9 +99,15 @@ export async function PUT(request) {
 
 
 // Eliminar ORCID por ID
-export async function DELETE(request, { params }) {
+export async function DELETE(request) {
   try {
-    const { id } = params;
+    // Obtener el ID desde la URL
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').pop(); // Extraer el último segmento de la URL
+
+    if (!id) {
+      return new Response(JSON.stringify({ error: 'ID no válido' }), { status: 400 });
+    }
 
     const connection = await pool.getConnection();
     const [result] = await connection.query('DELETE FROM investigaciones WHERE id = ?', [id]);
